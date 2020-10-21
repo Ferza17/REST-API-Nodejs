@@ -1,0 +1,19 @@
+{
+  "name": "restapi",
+  "version": "1.0.0",
+  "description": "REST API Built with Nodejs ",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ferza17/REST-API-Nodejs.git"
+  },
+  "author": "Fery Reza Aditya",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Ferza17/REST-API-Nodejs/issues"
+  },
+  "homepage": "https://github.com/Ferza17/REST-API-Nodejs#readme"
+}
