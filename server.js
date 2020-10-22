@@ -3,6 +3,10 @@
  */
 const express = require("express");
 const bodyParser = require("body-parser");
+const mongoose = require("mongoose");
+const http = require("http");
+require("dotenv/config");
+
 /**
  * ========= End Packages ==============
  */
@@ -28,4 +32,12 @@ app.use("/feed", feedRoutes);
 /**
  * ========= End Initialize ==============
  */
-app.listen(8080);
+mongoose
+  .connect(process.env.MONGODB_URL)
+  .then((result) => {
+    console.log("server runnnig on port :>> ", process.env.PORT);
+    http.createServer(app).listen(process.env.PORT);
+  })
+  .catch((err) => {
+    console.log("err :>> ", err);
+  });
