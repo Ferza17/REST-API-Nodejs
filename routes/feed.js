@@ -2,6 +2,7 @@
  * ========= Packages ==============
  */
 const express = require("express");
+const { body } = require("express-validator");
 /**
  * ========= End Packages ==============
  */
@@ -26,7 +27,14 @@ const router = express.Router();
 //  GET  feed/posts
 router.get("/posts", feedController.getPosts);
 // Post feed/posts
-router.get("/post", feedController.createPost);
+router.post(
+  "/post",
+  [
+    body("title").trim().isLength({ min: 5 }),
+    body("content").trim().isLength({ min: 5 }),
+  ],
+  feedController.createPost
+);
 /**
  * ========= End Routes ==============
  */
