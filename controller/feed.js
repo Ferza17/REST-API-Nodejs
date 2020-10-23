@@ -13,35 +13,63 @@ const Post = require("../models/post");
 /**
  * ========= End Models ==============
  */
+
+exports.getPost = (req, res, next) => {
+  const postId = req.params.postId;
+  Post.findById(postId)
+    .then((post) => {
+      if (!post) {
+        const error = new Error("Could not find post.");
+        error.statusCode = 404;
+        throw error;
+      }
+      res.status(200).json({
+        message: "Post Fetched",
+        post: post,
+      });
+    })
+    .catch((err) => {
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      next(err);
+    });
+};
+
 exports.getPosts = (req, res, next) => {
-  res.status(200).json({
-    posts: [
-      {
-        title: "First posts",
-        content: "This is my first posts!",
-        images: "images/Untitled2.png",
-      },
-    ],
-  });
+  Post.find()
+    .then((posts) => {
+      res.status(200).json({
+        message: "Posts Fetched",
+        posts: posts,
+      });
+    })
+    .catch((err) => {
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      next(err);
+    });
 };
 
 exports.createPost = (req, res, next) => {
   const errors = validationResult(req);
   const title = req.body.title;
   const content = req.body.content;
+  // For Windows User
+  const imageUrl = req.file.path.replace("\\", "/");
   const post = new Post({
     title: title,
     content: content,
-    imageUrl: "images/Untitled2.png",
+    imageUrl: imageUrl,
     creator: {
       name: "Anonim",
     },
   });
   if (!errors.isEmpty()) {
-    return res.status(422).json({
-      message: "Validation Failed, entered data is incorrect.",
-      errors: errors.array(),
-    });
+    const error = new Error("Validation Failed, entered data is incorrect.");
+    error.statusCode = 422;
+    throw error;
   }
   post
     .save()
@@ -52,11 +80,10 @@ exports.createPost = (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.log("err :>> ", err);
-      res.status(500),
-        json({
-          message: "Something went wrong on the server.",
-        });
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+
+      next(err);
     });
-  // Create post in db
 };

@@ -24,6 +24,9 @@ const router = express.Router();
  * ========= Routes ==============
  */
 
+// GET SINGLE POST
+router.get("/post/:postId", feedController.getPost);
+
 //  GET  feed/posts
 router.get("/posts", feedController.getPosts);
 // Post feed/posts
