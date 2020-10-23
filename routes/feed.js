@@ -38,6 +38,16 @@ router.post(
   ],
   feedController.createPost
 );
+
+// Updating Post
+router.put(
+  "/post/:postId",
+  [
+    body("title").trim().isLength({ min: 5 }),
+    body("content").trim().isLength({ min: 5 }),
+  ],
+  feedController.updatePost
+);
 /**
  * ========= End Routes ==============
  */
