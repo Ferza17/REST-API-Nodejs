@@ -44,6 +44,7 @@ const filter = (req, file, cb) => {
  * ========= Routes ==============
  */
 const feedRoutes = require("./routes/feed");
+const userRoutes = require("./routes/user");
 /**
  * ========= End Routes ==============
  */
@@ -57,14 +58,18 @@ app.use(
     fileFilter: filter,
   }).single("image")
 );
+app.use("/user", userRoutes);
 app.use("/feed", feedRoutes);
 app.use("/images", express.static(path.join(__dirname, "images")));
+
 app.use((error, req, res, next) => {
   console.log("error :>> ", error);
   const status = error.statusCode || 500;
   const message = error.message;
+  const data = error.data;
   res.status(status).json({
     message: message,
+    data: data,
   });
 });
 /**

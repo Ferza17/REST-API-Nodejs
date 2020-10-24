@@ -17,6 +17,7 @@ const Post = require("../models/post");
  * ========= End Models ==============
  */
 
+// Get Single Post
 exports.getPost = (req, res, next) => {
   const postId = req.params.postId;
   Post.findById(postId)
@@ -39,13 +40,31 @@ exports.getPost = (req, res, next) => {
     });
 };
 
+// Get All Posts with pagination
 exports.getPosts = (req, res, next) => {
+  const currentPage = req.query.page || 1;
+  const perPage = 2;
+  let totalItems;
   Post.find()
-    .then((posts) => {
-      res.status(200).json({
-        message: "Posts Fetched",
-        posts: posts,
-      });
+    .countDocuments()
+    .then((count) => {
+      totalItems = count;
+      Post.find()
+        .skip((currentPage - 1) * perPage)
+        .limit(perPage)
+        .then((posts) => {
+          res.status(200).json({
+            message: "Posts Fetched",
+            posts: posts,
+            totalItems: totalItems,
+          });
+        })
+        .catch((err) => {
+          if (!err.statusCode) {
+            err.statusCode = 500;
+          }
+          next(err);
+        });
     })
     .catch((err) => {
       if (!err.statusCode) {
@@ -55,6 +74,7 @@ exports.getPosts = (req, res, next) => {
     });
 };
 
+// Create Post
 exports.createPost = (req, res, next) => {
   const errors = validationResult(req);
   const title = req.body.title;
@@ -91,6 +111,7 @@ exports.createPost = (req, res, next) => {
     });
 };
 
+// Update Post
 exports.updatePost = (req, res, next) => {
   const postId = req.params.postId;
   const errors = validationResult(req);
@@ -143,6 +164,33 @@ exports.updatePost = (req, res, next) => {
     });
 };
 
+// Delete Post
+exports.deletePost = (req, res, next) => {
+  const postId = req.params.postId;
+  Post.findById(postId)
+    .then((post) => {
+      if (!post) {
+        const error = new Error("Could not find post.");
+        error.statusCode = 404;
+        throw error;
+      }
+      clearImage(post.imageUrl);
+      return Post.findByIdAndRemove(postId);
+    })
+    .then((result) => {
+      res.status(200).json({
+        message: "Delete Post Success!",
+      });
+    })
+    .catch((err) => {
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      next(err);
+    });
+};
+
+// Deleting image in static file
 const clearImage = (filePath) => {
   (filePath = path), join(__dirname, "..", filePath);
   fs.unlink(filePath, (err) => {
