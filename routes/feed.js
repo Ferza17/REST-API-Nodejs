@@ -48,6 +48,9 @@ router.put(
   ],
   feedController.updatePost
 );
+
+// Deleting post
+router.delete("/post/:postId", feedController.deletePost);
 /**
  * ========= End Routes ==============
  */
