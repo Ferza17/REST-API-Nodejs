@@ -78,7 +78,7 @@ exports.login = (req, res, next) => {
           email: loadedUser.email,
           userId: loadedUser._id.toString(),
         },
-        "very very secret words",
+        process.env.SECRET,
         {
           expiresIn: "1h",
         }

@@ -21,17 +21,25 @@ const router = express.Router();
  * ========= End Global Variable ==============
  */
 /**
+ * ========= Middleware ==============
+ */
+const isAuth = require("../middleware/auth");
+/**
+ * ========= End Middleware ==============
+ */
+/**
  * ========= Routes ==============
  */
 
 // GET SINGLE POST
-router.get("/post/:postId", feedController.getPost);
+router.get("/post/:postId", isAuth, feedController.getPost);
 
 //  GET  feed/posts
-router.get("/posts", feedController.getPosts);
+router.get("/posts", isAuth, feedController.getPosts);
 // Post feed/posts
 router.post(
   "/post",
+  isAuth,
   [
     body("title").trim().isLength({ min: 5 }),
     body("content").trim().isLength({ min: 5 }),
@@ -42,6 +50,7 @@ router.post(
 // Updating Post
 router.put(
   "/post/:postId",
+  isAuth,
   [
     body("title").trim().isLength({ min: 5 }),
     body("content").trim().isLength({ min: 5 }),
@@ -50,7 +59,7 @@ router.put(
 );
 
 // Deleting post
-router.delete("/post/:postId", feedController.deletePost);
+router.delete("/post/:postId", isAuth, feedController.deletePost);
 /**
  * ========= End Routes ==============
  */
