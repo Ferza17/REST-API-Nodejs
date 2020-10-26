@@ -10,6 +10,7 @@
   <li> Adding JWT </li>
   <li>Async & Sync code</li>
   <li>Web Sockets </li>
+  <li> Unit Test with Mocha and Chai </li>
 </ul>
 
 <p> doc : <a href="https://docs.google.com/document/d/1KKIfajXJ4iI5gz9578I3HcUjlznVCDh1aqDUdAy34DQ">This link </a> </p>
