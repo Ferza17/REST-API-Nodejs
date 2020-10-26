@@ -10,6 +10,13 @@ const path = require("path");
  * ========= End Packages ==============
  */
 /**
+ * ========= Global Variables ==============
+ */
+const io = require("../socket");
+/**
+ * ========= End Global Variables ==============
+ */
+/**
  * ========= Models ==============
  */
 const Post = require("../models/post");
@@ -41,38 +48,29 @@ exports.getPost = (req, res, next) => {
     });
 };
 
-// Get All Posts with pagination
-exports.getPosts = (req, res, next) => {
+// Get All Posts with pagination with Syncronous Methods
+exports.getPosts = async (req, res, next) => {
   const currentPage = req.query.page || 1;
   const perPage = 2;
-  let totalItems;
-  Post.find()
-    .countDocuments()
-    .then((count) => {
-      totalItems = count;
-      Post.find()
-        .skip((currentPage - 1) * perPage)
-        .limit(perPage)
-        .then((posts) => {
-          res.status(200).json({
-            message: "Posts Fetched",
-            posts: posts,
-            totalItems: totalItems,
-          });
-        })
-        .catch((err) => {
-          if (!err.statusCode) {
-            err.statusCode = 500;
-          }
-          next(err);
-        });
-    })
-    .catch((err) => {
-      if (!err.statusCode) {
-        err.statusCode = 500;
-      }
-      next(err);
+  // let totalItems;
+
+  try {
+    const totalItems = await Post.find().countDocuments();
+    const posts = await Post.find()
+      .populate("creator")
+      .skip((currentPage - 1) * perPage)
+      .limit(perPage);
+    res.status(200).json({
+      message: "Posts Fetched",
+      posts: posts,
+      totalItems: totalItems,
     });
+  } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(error);
+  }
 };
 
 // Create Post
@@ -95,33 +93,35 @@ exports.createPost = (req, res, next) => {
     error.statusCode = 422;
     throw error;
   }
-  post
-    .save()
-    .then((result) => {
-      return User.findById(userId);
-    })
-    .then((user) => {
-      creator = user;
-      user.posts.push(post);
-      return user.save();
-    })
-    .then((result) => {
-      res.status(201).json({
-        message: "Post Created!",
-        post: post,
-        creator: {
-          _id: creator_id,
-          name: creator.name,
-        },
-      });
-    })
-    .catch((err) => {
-      if (!err.statusCode) {
-        err.statusCode = 500;
-      }
 
-      next(err);
+  try {
+    await post.save();
+    const user = await User.findById(userId);
+    user.posts.push(post);
+    await user.save();
+    io.getIO().emit("posts", {
+      action: "create",
+      post: {
+        ...post._doc, creator: {
+          _id: userId,
+          name: user.name
+      } },
     });
+    res.status(201).json({
+      message: "Post Created!",
+      post: post,
+      creator: {
+        _id: creator_id,
+        name: creator.name,
+      },
+    });
+  } catch (error) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+
+    next(err);
+  }
 };
 
 // Update Post
